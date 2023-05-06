@@ -18,13 +18,13 @@
 
     // 函数
     function showspeed() {
-        document.getElementById('speeddiv').innerHTML = '速:' + cspeed.toFixed(2);
+        document.getElementById('speeddiv').innerHTML = '速:' + video.playbackRate.toFixed(2);
     }
     function changePlaybackRate(altKey, rateChange1, rateChange2) {
         var rateChange = (altKey) ? rateChange1 : rateChange2;
         video.playbackRate = (rateChange == 0) ? 1 : parseFloat((video.playbackRate + rateChange).toFixed(2));
-        cspeed = video.playbackRate;
-        sessionStorage.setItem("cspeed", cspeed);
+        // cspeed = video.playbackRate;
+        sessionStorage.setItem("cspeed", video.playbackRate);
         clearInterval(sInt);
         showspeed();
     }
@@ -52,8 +52,8 @@
         }, 100)
     } else {
         sInt = setInterval(function() {
-            cspeed = video.playbackRate||0;
-            sessionStorage.setItem("cspeed", cspeed);
+            // cspeed = video.playbackRate||0;
+            sessionStorage.setItem("cspeed", video.playbackRate);
             showspeed();
         }, 100)
     }
