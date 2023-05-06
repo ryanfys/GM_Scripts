@@ -10,19 +10,26 @@
 // ==/UserScript==
 (function() {
     'use strict';
-    // if (!document.querySelector('video') || document.querySelector('video').offsetWidth === 0 || document.querySelector('video').offsetHeight === 0) return;
-    if(!document.querySelector('video')) return;
 
+    // var video = document.querySelector('video');
+    var video = document.querySelector('video:not([controls=""])');
+    if(!video) return;
+    // if (!video || video.offsetWidth === 0 || video.offsetHeight === 0) return;
+
+    // 函数
     function showspeed() {
         document.getElementById('speeddiv').innerHTML = '速:' + cspeed.toFixed(2);
     }
-    function updatespeed() {
-        cspeed = document.querySelector('video').playbackRate;
-        sessionStorage.setItem("cspeed", cspeed.toFixed(2));
+    function changePlaybackRate(altKey, rateChange1, rateChange2) {
+        var rateChange = (altKey) ? rateChange1 : rateChange2;
+        video.playbackRate = (rateChange == 0) ? 1 : parseFloat((video.playbackRate + rateChange).toFixed(2));
+        cspeed = video.playbackRate;
+        sessionStorage.setItem("cspeed", cspeed);
         clearInterval(sInt);
         showspeed();
     }
 
+    // 创建倍速显示元素
     var div = document.createElement("div");
     div.innerHTML = '<div id="speeddiv" style="position: fixed;left: 0px;bottom: 0px;z-index: 9999999;font-size: 20px;display: none;background-color: #1abc9c;color: #ecf0f1;border-radius: 3px;padding: 2px;padding-top: 0px;padding-bottom: 0px;opacity: 0.8;"></div>';
     const biliPlayer = document.querySelector('.bpx-player-video-wrap');
@@ -35,51 +42,37 @@
     }
     document.getElementById('speeddiv').style.display = 'block';
 
+    // 初始化处理
+    var sInt
     var cspeed = sessionStorage.getItem("cspeed");
     if (cspeed) {
-        showspeed()
-        var sInt = setInterval(function() {
-            document.querySelector('video').playbackRate = cspeed;
+        sInt = setInterval(function() {
+            video.playbackRate = cspeed;
+            showspeed()
         }, 100)
-        setTimeout(function() {
-            clearInterval(sInt);
-        }, 10000)
     } else {
         sInt = setInterval(function() {
-            cspeed = document.querySelector('video').playbackRate||0;
+            cspeed = video.playbackRate||0;
+            sessionStorage.setItem("cspeed", cspeed);
             showspeed();
         }, 100)
-        setTimeout(function() {
-            clearInterval(sInt);
-        }, 10000)
     }
+    setTimeout(function() {
+        clearInterval(sInt);
+    }, 10000)
 
-    document.onkeydown = function(event) {
+    // 按键处理
+    function handleKeyDown(event) {
         event = event || window.event
         if (event.shiftKey || event.ctrlKey) return;
-        if (event.altKey) {
-            if (event.keyCode == 190 || event.keyCode == 67) {
-                document.querySelector('video').playbackRate = parseFloat((document.querySelector('video').playbackRate + 0.1).toFixed(2));
-                updatespeed();
-            } else if (event.keyCode == 188 || event.keyCode == 88) {
-                document.querySelector('video').playbackRate = parseFloat((document.querySelector('video').playbackRate - 0.1).toFixed(2));
-                updatespeed();
-            } else if (event.keyCode == 191 || event.keyCode == 90) {
-                document.querySelector('video').playbackRate = 1
-                updatespeed();
-            }
-        } else {
-            if (event.keyCode == 190 || event.keyCode == 67) {
-                document.querySelector('video').playbackRate = parseFloat((document.querySelector('video').playbackRate + 0.2).toFixed(2));
-                updatespeed();
-            } else if (event.keyCode == 188 || event.keyCode == 88) {
-                document.querySelector('video').playbackRate = parseFloat((document.querySelector('video').playbackRate - 0.2).toFixed(2));
-                updatespeed();
-            } else if (event.keyCode == 191 || event.keyCode == 90) {
-                document.querySelector('video').playbackRate = 1
-                updatespeed();
-            }
+        if (event.keyCode == 190 || event.keyCode == 67) {
+            changePlaybackRate(event.altKey, 0.1, 0.2)
+        } else if (event.keyCode == 188 || event.keyCode == 88) {
+            changePlaybackRate(event.altKey, -0.1, -0.2)
+        } else if (event.keyCode == 191 || event.keyCode == 90) {
+            changePlaybackRate(event.altKey, 0, 0)
         }
     }
+    document.onkeydown = handleKeyDown;
     // Your code here...
 })();
